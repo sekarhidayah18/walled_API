@@ -10,6 +10,24 @@ const registerSchema = Joi.object({
   fullname: Joi.string().required(),
 });
 
+const loginSchema = Joi.object({
+  email: Joi.string().email().required(),
+  password: Joi.string().required(),
+});
+
+const getUserById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await userService.getUserById(id);
+    res.status(200).json({ data: new UserResponse(user) });
+  } catch (error) {
+    if (error.message === "user not found") {
+      return res.status(404).json({ error: error.message });
+    }
+    res.status(error.statusCode || 500).json({ error: error.message });
+  }
+};
+
 const createUser = async (req, res) => {
   try {
     const { error, value } = registerSchema.validate(req.body);
@@ -25,16 +43,18 @@ const createUser = async (req, res) => {
   }
 };
 
-const getUserById = async (req, res) => {
+const login = async (req, res) => {
   try {
-    const { id } = req.params;
-    const user = await userService.getUserById(id);
-    res.status(200).json({ data: new UserResponse(user) });
-  } catch (error) {
-    if (error.message === "user not found") {
-      return res.status(404).json({ error: error.message });
+    const { error, value } = loginSchema.validate(req.body);
+
+    if (error) {
+      return res.status(400).json({ error: error.message });
     }
-    res.status(error.statusCode || 500).json({ error: error.message });
+
+    const isValid = await userService.login(value);
+    res.status(200).json({ data: isValid });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
-module.exports = { createUser, getUserById };
+module.exports = { createUser, getUserById, login };
