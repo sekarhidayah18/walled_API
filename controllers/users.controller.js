@@ -17,8 +17,8 @@ const loginSchema = Joi.object({
 
 const getUserById = async (req, res) => {
   try {
-    const { id } = req.params;
-    const user = await userService.getUserById(id);
+    const { id } = req.user;
+    const user = await userService.getUserById(Number(id));
     res.status(200).json({ data: new UserResponse(user) });
   } catch (error) {
     if (error.message === "user not found") {

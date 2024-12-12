@@ -33,7 +33,7 @@ const login = async (userData) => {
     throw new Error(401);
   }
 
-  const token = generateAccessToken({ email: userData.email });
+  const token = generateAccessToken({ email: userData.email, id: user.rows[0].id });
 
   return token;
 };
