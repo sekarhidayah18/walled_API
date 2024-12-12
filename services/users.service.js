@@ -1,5 +1,6 @@
 const bcrypt = require("bcrypt");
 const userRepository = require("../repositories/users.repository");
+const { generateAccessToken } = require("../utils/auth.util");
 
 const createUser = async (userData) => {
   let user = await userRepository.findUserByEmail(userData.email);
@@ -20,12 +21,21 @@ const login = async (userData) => {
   let user = await userRepository.findUserByEmail(userData.email);
 
   if (user.rows.length === 0) {
-    throw new Error("user doesn't exist");
+    throw new Error(404);
   }
-  
-  const isValid = await bcrypt.compare(userData.password, user.rows[0].password);
 
-  return isValid;
+  const isPasswordMatched = await bcrypt.compare(
+    userData.password,
+    user.rows[0].password
+  );
+
+  if (!isPasswordMatched) {
+    throw new Error(401);
+  }
+
+  const token = generateAccessToken({ email: userData.email });
+
+  return token;
 };
 
 const getUserById = async (id) => {

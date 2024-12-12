@@ -51,9 +51,16 @@ const login = async (req, res) => {
       return res.status(400).json({ error: error.message });
     }
 
-    const isValid = await userService.login(value);
-    res.status(200).json({ data: isValid });
+    const token = await userService.login(value);
+    res.status(200).json({ data: { token: token } });
   } catch (error) {
+    if (error.message === "404") {
+      return res.status(404).json({ message: "user doesn't exist" });
+    }
+
+    if (error.message === "401") {
+      return res.status(404).json({ message: "email or password not valid" });
+    }
     res.status(500).json({ message: error.message });
   }
 };
