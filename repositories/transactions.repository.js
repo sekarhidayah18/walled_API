@@ -70,13 +70,43 @@ const topUp = async ({ walletId, amount, description }) => {
 const findAllTransactionsByWalletId = async (walletId) => {
   const client = await pool.connect();
   try {
-    const result = await client.query(
-      `SELECT * FROM transactions WHERE wallet_id = $1`,
-      [walletId]
-    );
+    const query = `
+      SELECT 
+        t.id AS transaction_id,
+        t.transaction_type,
+        t.amount,
+        t.description,
+        t.transaction_date,
+        t.recipient_wallet_id,
+        CASE 
+          WHEN t.transaction_type = 'top-up' THEN u.id
+          ELSE r_u.id
+        END AS recipient_id,
+        CASE 
+          WHEN t.transaction_type = 'top-up' THEN u.username
+          ELSE r_u.username
+        END AS recipient_username,
+        CASE 
+          WHEN t.transaction_type = 'top-up' THEN u.fullname
+          ELSE r_u.fullname
+        END AS recipient_fullname,
+        CASE 
+          WHEN t.transaction_type = 'top-up' THEN u.email
+          ELSE r_u.email
+        END AS recipient_email
+      FROM transactions t
+      LEFT JOIN wallets r_w ON t.recipient_wallet_id = r_w.id
+      LEFT JOIN users r_u ON r_w.user_id = r_u.id
+      LEFT JOIN wallets w ON t.wallet_id = w.id
+      LEFT JOIN users u ON w.user_id = u.id
+      WHERE t.wallet_id = $1;
+    `;
+    const result = await client.query(query, [walletId]);
     return result.rows;
   } catch (error) {
-    throw new Error("Something when wrong");
+    throw new Error("Something went wrong while fetching transactions");
+  } finally {
+    client.release();
   }
 };
 
