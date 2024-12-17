@@ -16,6 +16,25 @@ CREATE TABLE wallets (
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
+CREATE SEQUENCE account_number_seq
+    START WITH 123000000
+    INCREMENT BY 1
+    MINVALUE 123000000;
+
+CREATE OR REPLACE FUNCTION set_account_number()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.account_number := NEXTVAL('account_number_seq')::VARCHAR;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_set_account_number
+BEFORE INSERT ON wallets
+FOR EACH ROW
+EXECUTE FUNCTION set_account_number();
+
+
 CREATE TABLE transactions (
     id BIGSERIAL NOT NULL PRIMARY KEY,
     wallet_id BIGINT NOT NULL REFERENCES wallets(id) ON DELETE CASCADE,
@@ -25,13 +44,3 @@ CREATE TABLE transactions (
     transaction_date TIMESTAMP DEFAULT NOW(),
     description text
 );
-
-CREATE SEQUENCE wallet_number_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER TABLE wallets
-ADD COLUMN account_number character varying(20) NOT NULL UNIQUE DEFAULT ('12300000' || NEXTVAL('wallet_number_seq'));
