@@ -1,49 +1,55 @@
 const bcrypt = require("bcrypt");
 const userRepository = require("../repositories/users.repository");
 const { generateAccessToken } = require("../utils/auth.util");
+const {
+  UserAlreadyExistsError,
+  AuthenticationError,
+  NotFoundError,
+} = require("../dto/customErrors");
 
 const createUser = async (userData) => {
-  let user = await userRepository.findUserByEmail(userData.email);
-
-  if (user.rows.length > 0) {
-    throw new Error("user already exist");
+  const existingUser = await userRepository.findUserByEmail(userData.email);
+  if (existingUser) {
+    throw new UserAlreadyExistsError();
   }
 
   const salt = await bcrypt.genSalt();
   const hashedPassword = await bcrypt.hash(userData.password, salt);
+
   const newUser = { ...userData, password: hashedPassword };
 
-  user = await userRepository.createUser(newUser);
-  return user;
+  const createdUser = await userRepository.createUser(newUser);
+  return createdUser;
 };
 
 const login = async (userData) => {
-  let user = await userRepository.findUserByEmail(userData.email);
+  const user = await userRepository.findUserByEmail(userData.email);
 
-  if (user.rows.length === 0) {
-    throw new Error(404);
+  if (!user) {
+    throw new AuthenticationError(); // Invalid credentials
   }
 
   const isPasswordMatched = await bcrypt.compare(
     userData.password,
-    user.rows[0].password
+    user.password
   );
 
   if (!isPasswordMatched) {
-    throw new Error(401);
+    throw new AuthenticationError(); // Invalid credentials
   }
 
-  const token = generateAccessToken({ email: userData.email, id: user.rows[0].id });
-
+  const token = generateAccessToken({ email: user.email, id: user.id });
   return token;
 };
 
 const getUserById = async (id) => {
-  let user = await userRepository.findUserById(id);
+  const user = await userRepository.findUserById(id);
+
   if (!user) {
-    throw new Error("user not found");
+    throw new NotFoundError("User not found");
   }
+
   return user;
 };
 
-module.exports = { createUser, getUserById, login };
+module.exports = { createUser, login, getUserById };
