@@ -3,7 +3,7 @@ const pool = require("../db/db");
 const findUserById = async (id) => {
   try {
     const result = await pool.query(
-      `SELECT users.id, users.username, users.fullname, users.email, 
+      `SELECT users.id, users.username, users.fullname, users.email, users.avatar_url
               wallets.account_number, wallets.balance
        FROM users
        LEFT JOIN wallets ON users.id = wallets.user_id
