@@ -26,7 +26,7 @@ const login = async (userData) => {
   const user = await userRepository.findUserByEmail(userData.email);
 
   if (!user) {
-    throw new AuthenticationError(); // Invalid credentials
+    throw new AuthenticationError();
   }
 
   const isPasswordMatched = await bcrypt.compare(
@@ -35,10 +35,13 @@ const login = async (userData) => {
   );
 
   if (!isPasswordMatched) {
-    throw new AuthenticationError(); // Invalid credentials
+    throw new AuthenticationError();
   }
-
-  const token = generateAccessToken({ email: user.email, id: user.id });
+  const token = generateAccessToken({
+    email: user.email,
+    id: user.id,
+    walletId: user.wallet_id,
+  });
   return token;
 };
 
@@ -49,7 +52,13 @@ const getUserById = async (id) => {
     throw new NotFoundError("User not found");
   }
 
-  return user;
+  return {
+    ...user,
+    wallet: {
+      account_number: user.account_number,
+      balance: user.balance,
+    },
+  };
 };
 
 module.exports = { createUser, login, getUserById };

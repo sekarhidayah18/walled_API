@@ -1,0 +1,10 @@
+const express = require("express");
+const router = express.Router();
+
+const transactionController = require("../controllers/transactions.controller");
+const authenticateToken = require("../middlewares/auth.middleware");
+
+router.post("/transactions/transfer", authenticateToken, transactionController.transfer);
+router.post("/transactions/topup", authenticateToken,  transactionController.topUp);
+
+module.exports = router;

@@ -19,9 +19,13 @@ const findUserById = async (id) => {
 
 const findUserByEmail = async (email) => {
   try {
-    const result = await pool.query("SELECT * FROM users where email = $1", [
-      email,
-    ]);
+    const result = await pool.query(
+      `SELECT users.*, wallets.id AS wallet_id
+       FROM users
+       LEFT JOIN wallets ON wallets.user_id = users.id
+       WHERE users.email = $1`,
+      [email]
+    );
     return result.rows[0];
   } catch (error) {
     throw new Error("Something went wrong");
@@ -67,4 +71,39 @@ const createUser = async (user) => {
   }
 };
 
-module.exports = { createUser, findUserByEmail, findUserById };
+const findWalletByUserId = async (userId) => {
+  try {
+    const query = `
+      SELECT id, user_id, account_number, balance, created_at, updated_at
+      FROM wallets
+      WHERE user_id = $1;
+    `;
+    const result = await pool.query(query, [userId]);
+    return result.rows[0];
+  } catch (error) {
+    throw new Error("Failed to fetch wallet by user ID.");
+  }
+};
+
+const findWalletById = async (walletId) => {
+  try {
+    const query = `
+      SELECT id, user_id, account_number, balance, created_at, updated_at
+      FROM wallets
+      WHERE account_number = $1;
+    `;
+    const result = await pool.query(query, [walletId]);
+
+    return result.rows[0];
+  } catch (error) {
+    throw new Error("Failed to fetch wallet by ID.");
+  }
+};
+
+module.exports = {
+  createUser,
+  findUserByEmail,
+  findUserById,
+  findWalletById,
+  findWalletByUserId,
+};
