@@ -70,12 +70,12 @@ const createUser = async (user) => {
   }
 };
 
-const findWalletByUserId = async (userId) => {
+const findWalletByWalletId = async (userId) => {
   try {
     const query = `
       SELECT id, user_id, account_number, balance, created_at, updated_at
       FROM wallets
-      WHERE user_id = $1;
+      WHERE id = $1;
     `;
     const result = await pool.query(query, [userId]);
     return result.rows[0];
@@ -104,5 +104,5 @@ module.exports = {
   findUserByEmail,
   findUserById,
   findWalletById,
-  findWalletByUserId,
+  findWalletByWalletId,
 };

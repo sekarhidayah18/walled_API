@@ -30,7 +30,8 @@ const transfer = async (userId, recipientWalletId, amount, description) => {
 };
 
 const topUp = async (walletId, amount, description) => {
-  const wallet = await userRepository.findWalletById(walletId);
+  const wallet = await userRepository.findWalletByWalletId(walletId);
+  
   if (!wallet) {
     throw new NotFoundError("Wallet not found for the user");
   }
