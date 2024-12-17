@@ -99,7 +99,7 @@ const findAllTransactionsByWalletId = async (walletId) => {
       LEFT JOIN users r_u ON r_w.user_id = r_u.id
       LEFT JOIN wallets w ON t.wallet_id = w.id
       LEFT JOIN users u ON w.user_id = u.id
-      WHERE t.wallet_id = $1;
+      WHERE t.wallet_id = $1 OR t.recipient_wallet_id = $1;
     `;
     const result = await client.query(query, [walletId]);
     return result.rows;
