@@ -44,4 +44,11 @@ const topUp = async (userId, amount, description) => {
   return transaction;
 };
 
-module.exports = { transfer, topUp };
+const getAllTransactions = async (walletId) => {
+  const transactions = await transactionRepository.findAllTransactionsByWalletId(
+    walletId
+  );
+  return transactions;
+};
+
+module.exports = { transfer, topUp, getAllTransactions };

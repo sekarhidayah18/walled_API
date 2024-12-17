@@ -1,3 +1,4 @@
+const res = require("express/lib/response");
 const pool = require("../db/db");
 
 const transfer = async ({
@@ -66,4 +67,17 @@ const topUp = async ({ walletId, amount, description }) => {
   }
 };
 
-module.exports = { transfer, topUp };
+const findAllTransactionsByWalletId = async (walletId) => {
+  const client = await pool.connect();
+  try {
+    const result = await client.query(
+      `SELECT * FROM transactions WHERE wallet_id = $1`,
+      [walletId]
+    );
+    return result.rows;
+  } catch (error) {
+    throw new Error("Something when wrong");
+  }
+};
+
+module.exports = { transfer, topUp, findAllTransactionsByWalletId };

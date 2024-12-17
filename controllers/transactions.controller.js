@@ -57,4 +57,14 @@ const transfer = async (req, res, next) => {
   }
 };
 
-module.exports = { topUp, transfer };
+const getAllTransactions = async (req, res, next) => {
+  try {
+    const { walletId } = req.user;
+    const transactions = await transactionService.getAllTransactions(walletId);
+    res.status(200).json({ data: transactions });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { topUp, transfer, getAllTransactions };
