@@ -3,6 +3,9 @@ const userRepository = require("../repositories/users.repository");
 const { NotFoundError, ValidationError } = require("../dto/customErrors");
 
 const transfer = async (userId, recipientWalletId, amount, description) => {
+  if (userId === recipientWalletId) {
+    throw new ValidationError("Cannot transfer to your own wallet")
+  } 
   const senderWallet = await userRepository.findWalletByUserId(userId);
   if (!senderWallet) {
     throw new NotFoundError("Wallet not found for the user");

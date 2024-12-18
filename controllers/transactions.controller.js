@@ -7,7 +7,7 @@ const topUpSchema = Joi.object({
 });
 
 const transferSchema = Joi.object({
-  amount: Joi.number().positive().precision(2).required(),
+  amount: Joi.number().positive().required(),
   recipientWalletId: Joi.string().required(),
   description: Joi.string().optional(),
 });

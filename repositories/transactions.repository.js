@@ -1,4 +1,3 @@
-const res = require("express/lib/response");
 const pool = require("../db/db");
 
 const transfer = async ({
